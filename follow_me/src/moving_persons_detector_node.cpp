@@ -115,6 +115,7 @@ void update() {
                 new_robot = false;
                 nb_pts = 0;
                 ROS_INFO("new robot and new scanner");
+                ROS_INFO("ROBOT MOVING = %d", current_robot_moving);
                 //if the robot is not moving then we can perform moving persons detection
                 if ( !current_robot_moving ) {
 
@@ -203,8 +204,9 @@ void perform_clustering() {
                 if (dynamic[loop] == 1) {
                         nb_dynamic++;
                 }
+                // ROS_INFO("%d", abs(background[loop] - old_background[loop]) < cluster_threshold);
                 if (abs(background[loop] - old_background[loop]) < cluster_threshold) {
-                        /* code */
+                        cluster[loop] = nb_cluster;
                 } else {
                         cluster_end[nb_cluster] = loop;
                         cluster_size[nb_cluster] = cluster_start[nb_cluster] - cluster_end[nb_cluster];
@@ -244,6 +246,7 @@ void perform_clustering() {
         //Dont forget to update the different information for the last cluster
         //...
         nb_cluster++;
+        ROS_INFO("Number of clusters: %d", nb_cluster);
 
 } //perfor_clustering
 
@@ -259,8 +262,7 @@ void detect_moving_legs() {
         ROS_INFO("detecting moving legs");
         nb_moving_legs_detected = 0;
         for (int loop = 0; loop < nb_cluster; loop++) {
-                moving_persons_detected[nb_moving_legs_detected] = cluster_middle[loop];
-                nb_moving_legs_detected++;
+                ROS_INFO("Cluster:%d, %d ,%d",cluster_size[loop] > leg_size_min, cluster_size[loop] < leg_size_max, cluster_dynamic[loop] > dynamic_threshold);
                 if (cluster_size[loop] > leg_size_min && cluster_size[loop] < leg_size_max && cluster_dynamic[loop] > dynamic_threshold) {
                         moving_persons_detected[nb_moving_legs_detected] = cluster_middle[loop];
                         ROS_INFO("moving leg detected[%i]: cluster[%i]", nb_moving_legs_detected, loop);
